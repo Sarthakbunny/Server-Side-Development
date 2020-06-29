@@ -14,7 +14,7 @@ connect.then((db) => {
         description: 'test'
     })
     .then((dish) => {
-        console.log(dish);
+        console.log(JSON.stringify(dish,undefined, 2));
 
         return Dishes.findByIdAndUpdate(dish._id, {
             $set: { description: 'Updated test'}
@@ -24,7 +24,7 @@ connect.then((db) => {
         .exec();
     })
     .then((dish) => {
-        console.log(dish);
+        console.log(JSON.stringify(dish,undefined, 2));
 
         dish.comments.push({
             rating: 5,
@@ -35,7 +35,7 @@ connect.then((db) => {
         return dish.save();
     })
     .then((dish) => {
-        console.log(dish);
+        console.log(JSON.stringify(dish,undefined, 2));
 
         return Dishes.remove({});
     })
