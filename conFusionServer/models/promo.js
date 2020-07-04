@@ -19,8 +19,9 @@ var promoSchema = new Schema({
         default: ''
     },
     price: {
-        type: String,
-        default: ''
+        type: Currency,
+        required:true,
+        min: 0
     },
     description: {
         type: String,
