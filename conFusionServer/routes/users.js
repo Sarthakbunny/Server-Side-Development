@@ -4,30 +4,55 @@ var User =require('../models/user');
 var passport = require('passport');
 const { route } = require('.');
 var authenticate = require('../authenticate');
+const user = require('../models/user');
 
 var router = express.Router();
 router.use(bodyParser.json());
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/', authenticate.verifyUser, authenticate.verifyadmin, function(req, res, next) {
+  user.find({}, (err,users) => {
+    if(err){
+      err= "You are not admin";
+      err.status = 403;
+      return next(err);
+    }
+    else{
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(users);
+    }
+  })
 });
 
 router.post('/signup' , (req,res,next) => {
-  User.register(new User({username: req.body.username}),req.body.password, (err,user) =>{ 
+  User.register(new User({username: req.body.username}),
+    req.body.password, (err,user) =>{ 
     if(err){
      res.statusCode = 500;
      res.setHeader('Content-Type' , 'application/json');
      res.json({err: err});
     }
     else{
-      passport.authenticate('local')(req,res,()=>{
-      res.statusCode=200;
-      res.setHeader('Content-Type','text/plain');
-      res.json({success: true, status: 'Registration Successfull'});
+      if(req.body.firstname)
+        user.firstname = req.body.firstname;
+      if(req.body.lastname)
+        user.lastname = req.body.lastname;        
+      user.save((err, user) => {
+        if (err) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type' , 'application/json');
+          res.json({err: err});
+          return;
+        }
+        passport.authenticate('local')(req,res,()=>{
+        res.statusCode=200;
+        res.setHeader('Content-Type','text/plain');
+        res.json({success: true, status: 'Registration Successfull'});
+      });
      });
     }
-  })
+  });
 });
 
 router.post('/login' , passport.authenticate('local'), (req,res,next) => {
@@ -50,4 +75,5 @@ router.get('/logout', (req,res)=>{
     return next(err);
   }
 });
+
 module.exports = router;
