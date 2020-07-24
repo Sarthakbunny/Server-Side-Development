@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const authentiacte = require('../authenticate');
+const cors = require('./cors');
 
 const Promos = require('../models/promo');
 
@@ -10,7 +11,8 @@ const promoRouter = express.Router();
 promoRouter.use(bodyParser.json());
 
 promoRouter.route('/')
-    .get((req, res, next) => {
+.options(cors.corsWithOptions, (req,res) => { res.statusCode =200; })
+    .get(cors.cors, (req, res, next) => {
         Promos.find({})
         .then((promos)=>{
             res.statusCode=200;
@@ -19,7 +21,7 @@ promoRouter.route('/')
         },(err)=>next(err))
         .catch((err)=>next(err));
     })
-    .post(authentiacte.verifyUser, (req, res, next) => {
+    .post(cors.corsWithOptions, authentiacte.verifyUser, (req, res, next) => {
         Promos.create(req.body)
         .then((promo)=>{
             res.statusCode=200;
@@ -28,11 +30,11 @@ promoRouter.route('/')
         },(err)=>next(err))
         .catch((err)=>next(err));
     })
-    .put(authentiacte.verifyUser, (req, res, next) => {
+    .put(cors.corsWithOptions, authentiacte.verifyUser, (req, res, next) => {
         res.statusCode = 403;
         res.end("PUT operation not allowed on /promo");
     })
-    .delete(authentiacte.verifyUser, (req, res, next) => {
+    .delete(cors.corsWithOptions, authentiacte.verifyUser, (req, res, next) => {
         Promos.remove({})
         .then((promo)=>{
             res.statusCode=200;
@@ -43,7 +45,8 @@ promoRouter.route('/')
     });
 
 promoRouter.route('/:promoId')
-    .get((req, res, next) => {
+.options(cors.corsWithOptions, (req,res) => { res.statusCode =200; })
+    .get(cors.cors, (req, res, next) => {
         Promos.findById(req.params.promoId)
         .then((promo)=>{
             res.statusCode=200;
@@ -52,11 +55,11 @@ promoRouter.route('/:promoId')
         },(err)=>next(err))
         .catch((err)=>next(err));
     })
-    .post(authentiacte.verifyUser, (req, res, next) => {
+    .post(cors.corsWithOptions, authentiacte.verifyUser, (req, res, next) => {
         res.statusCode=403;
         res.end(`POST function not allowed on /promo/` + req.params.promoId);
     })
-    .put(authentiacte.verifyUser, (req, res, next) => {
+    .put(cors.corsWithOptions, authentiacte.verifyUser, (req, res, next) => {
         Promos.findByIdAndUpdate(req.params.promoId,{
             $set: req.body
         },{new: true})
@@ -67,7 +70,7 @@ promoRouter.route('/:promoId')
         },(err)=>next(err))
         .catch((err)=>next(err));
     })
-    .delete(authentiacte.verifyUser, (req, res, next) => {
+    .delete(cors.corsWithOptions, authentiacte.verifyUser, (req, res, next) => {
         Promos.findByIdAndRemove(req.params.promoId)
         .then((resp)=>{
             res.statusCode=200;
